@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Task Tracker</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap">
+    <style>
+        :root[data-theme="light"] {
+            --bg-primary: #ffffff;
+            --bg-secondary: #f8f9fa;
+            --text-primary: #1a1a1a;
+            --text-secondary: #4a4a4a;
+            --accent-primary: #2563eb;
+            --accent-secondary: #3b82f6;
+            --border-color: #e5e7eb;
+            --input-bg: #ffffff;
+            --card-bg: #ffffff;
+            --hover-bg: #f3f4f6;
+        }
+
+        :root[data-theme="dark"] {
+            --bg-primary: #111827;
+            --bg-secondary: #1f2937;
+            --text-primary: #f9fafb;
+            --text-secondary: #d1d5db;
+            --accent-primary: #3b82f6;
+            --accent-secondary: #60a5fa;
+            --border-color: #374151;
+            --input-bg: #1f2937;
+            --card-bg: #1f2937;
+            --hover-bg: #374151;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            transition: background-color 0.3s, color 0.3s, border-color 0.3s;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+
+        h1 {
+            font-size: 2rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .theme-toggle {
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 0.5rem;
+            color: var(--text-primary);
+            font-size: 1.5rem;
+        }
+
+        .input-group {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+
+        #taskInput {
+            flex: 1;
+            padding: 0.75rem 1rem;
+            border: 1px solid var(--border-color);
+            border-radius: 0.5rem;
+            background-color: var(--input-bg);
+            color: var(--text-primary);
+            font-size: 1rem;
+        }
+
+        button {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 0.5rem;
+            background-color: var(--accent-primary);
+            color: white;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        button:hover {
+            background-color: var(--accent-secondary);
+            transform: translateY(-1px);
+        }
+
+        button:disabled {
+            background-color: var(--bg-secondary);
+            color: var(--text-secondary);
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .card {
+            background-color: var(--card-bg);
+            border-radius: 0.75rem;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        #currentTask {
+            background-color: var(--bg-secondary);
+            padding: 1rem;
+            border-radius: 0.5rem;
+            margin: 1rem 0;
+        }
+
+        #statusBar {
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+            margin-bottom: 1rem;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1.5rem;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 0.5rem;
+        }
+
+        .tab-button {
+            background: none;
+            color: var(--text-secondary);
+            padding: 0.5rem 1rem;
+            border: none;
+            cursor: pointer;
+            font-weight: 500;
+            position: relative;
+        }
+
+        .tab-button.active {
+            color: var(--accent-primary);
+        }
+
+        .tab-button.active::after {
+            content: '';
+            position: absolute;
+            bottom: -0.5rem;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background-color: var(--accent-primary);
+        }
+
+        .chart-container {
+            background-color: var(--card-bg);
+            border-radius: 0.75rem;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            height: 400px;
+            position: relative;
+        }
+
+        .chart-container h3 {
+            color: var(--text-primary);
+            margin-bottom: 1rem;
+            font-size: 1.25rem;
+        }
+
+        .chart-container canvas {
+            width: 100% !important;
+            height: 100% !important;
+        }
+
+        .task-entries {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .task-entry {
+            padding: 1rem;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .task-entry:hover {
+            background-color: var(--hover-bg);
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(4px);
+        }
+
+        .modal-content {
+            background-color: var(--card-bg);
+            margin: 10% auto;
+            padding: 2rem;
+            border-radius: 0.75rem;
+            width: 90%;
+            max-width: 500px;
+            position: relative;
+        }
+
+        .close {
+            position: absolute;
+            right: 1.5rem;
+            top: 1.5rem;
+            color: var(--text-secondary);
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+
+        .close:hover {
+            color: var(--text-primary);
+        }
+
+        select {
+            padding: 0.75rem;
+            border: 1px solid var(--border-color);
+            border-radius: 0.5rem;
+            background-color: var(--input-bg);
+            color: var(--text-primary);
+            margin: 0.5rem 0;
+        }
+
+        .time-range-selector {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .time-range-selector button {
+            background-color: var(--bg-secondary);
+            color: var(--text-primary);
+        }
+
+        .time-range-selector button:hover {
+            background-color: var(--hover-bg);
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+
+            .input-group {
+                flex-direction: column;
+            }
+
+            button {
+                width: 100%;
+            }
+
+            .modal-content {
+                margin: 20% auto;
+                width: 95%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Task Tracker</h1>
+            <button class="theme-toggle" id="themeToggle">🌙</button>
+        </div>
+
+        <div class="card">
+            <div class="input-group">
+                <input type="text" id="taskInput" placeholder="What are you working on now?">
+                <button id="logButton">Log Task</button>
+                <button id="stopTaskButton">Stop Task</button>
+            </div>
+            <div id="statusBar">Ready.</div>
+            <div id="currentTask">Loading current task...</div>
+        </div>
+
+        <div class="tabs">
+            <button class="tab-button active" data-tab="overview">Overview</button>
+            <button class="tab-button" data-tab="tasks">Recent Tasks</button>
+            <button class="tab-button" data-tab="admin">Admin</button>
+        </div>
+
+        <div id="overview" class="tab-content">
+            <div class="time-range-selector">
+                <button data-range="today">Today</button>
+                <button data-range="week">This Week</button>
+                <button data-range="all">All Time</button>
+            </div>
+
+            <div class="chart-container">
+                <h3>Time Spent by Project</h3>
+                <canvas id="projectChart"></canvas>
+            </div>
+            <div class="chart-container">
+                <h3>Time Spent by Task Type</h3>
+                <canvas id="typeChart"></canvas>
+            </div>
+        </div>
+
+        <div id="tasks" class="tab-content">
+            <div class="card">
+                <h3>Recent Tasks</h3>
+                <div class="task-entries">
+                    <div id="taskList"></div>
+                </div>
+            </div>
+        </div>
+
+        <div id="admin" class="tab-content">
+            <div class="card">
+                <h3>Admin Controls</h3>
+                <div class="input-group">
+                    <input type="number" id="clearMinutesInput" placeholder="Minutes" min="1">
+                    <button id="clearRecentButton">Clear Recent Logs</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="editModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Edit Task Categories</h2>
+            <div id="editTaskInfo"></div>
+            <div style="margin-top: 1rem;">
+                <label for="editProject">Project:</label>
+                <select id="editProject"></select>
+                <label for="editTaskType">Task Type:</label>
+                <select id="editTaskType"></select>
+            </div>
+            <button id="saveEdit" style="margin-top: 1rem;">Save Changes</button>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+    <script>
+        // Theme toggle functionality
+        const themeToggle = document.getElementById('themeToggle');
+        const html = document.documentElement;
+        
+        // Check for saved theme preference
+        const savedTheme = localStorage.getItem('theme') || 'light';
+        html.setAttribute('data-theme', savedTheme);
+        themeToggle.textContent = savedTheme === 'dark' ? '☀️' : '🌙';
+
+        themeToggle.addEventListener('click', () => {
+            const currentTheme = html.getAttribute('data-theme');
+            const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+            
+            html.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+            themeToggle.textContent = newTheme === 'dark' ? '☀️' : '🌙';
+        });
+    </script>
+</body>
+</html>

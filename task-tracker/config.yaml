@@ -1,0 +1,39 @@
+# Ollama Configuration
+ollama_api_url: "http://localhost:11434/api/generate" # Default Ollama API endpoint
+ollama_model: "phi4:latest"  # Change to the model you have downloaded and want to use
+ollama_request_timeout: 60 # Seconds to wait for Ollama response
+
+# Task Categories (Used for Prompting Ollama)
+# Ensure "Un-categorized" is handled if Ollama can't classify
+project_categories:
+  - name: LLM Agent Learning and Improvement Toolkit
+    description: "Developing a easy to use tool for LLM Agent developers to improve agent by using its memory and experience trajectories"
+  - name: Internal Tools
+    description: "Creating or maintaining internal scripts, dashboards (e.g., Grafana, Streamlit), or utilities for team productivity, CI/CD pipelines, or automation."
+  - name: Learning & Development
+    description: "Time spent on courses (e.g., Coursera, Udemy), reading documentation, attending workshops, upskilling in new technologies like specific AI models or frameworks."
+  - name: Admin & Comms
+    description: "General administrative tasks, team communication, emails, documentation unrelated to specific project deliverables, timesheets, performance reviews."
+  # Add more of your projects with relevant descriptions
+
+
+task_type_categories:
+  - name: Coding
+    description: "Writing new source code, implementing features according to specs, developing algorithms, writing unit tests as part of development."
+  - name: Debugging
+    description: "Investigating, identifying, and fixing bugs, errors, or unexpected behavior in existing code or systems. Analyzing logs and traces."
+  - name: Testing
+    description: "Manual or automated testing of features, writing integration tests, regression testing, validating data quality, performance testing."
+  - name: Code Review
+    description: "Reviewing code written by others, providing feedback, merging pull requests."
+  - name: Meeting
+    description: "Attending scheduled meetings, stand-ups, syncs, planning sessions, customer calls, presentations."
+  - name: Planning
+    description: "Breaking down tasks, estimating effort, designing solutions, architectural discussions, writing design documents or proposals."
+  - name: Documentation
+    description: "Writing or updating technical documentation, user guides, README files, API specifications, project reports."
+  - name: Research
+    description: "Investigating new technologies, exploring potential solutions, reading research papers, competitive analysis, feasibility studies."
+  - name: Mentoring
+    description: "Providing guidance or support to other team members, pair programming for teaching purposes, onboarding new hires."
+  # Add more task types with relevant descriptions
